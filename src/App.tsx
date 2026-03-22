@@ -1,0 +1,1 @@
+import React from 'react';\nimport LandingPage from './LandingPage';\n\nconst App: React.FC = () => {\n    return (\n        <div>\n            <LandingPage />\n        </div>\n    );\n};\n\nexport default App;\n
