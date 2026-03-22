@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Loader2, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { db as supabase } from '../../../lib/db';
-import { LandlordVerification } from '../../verification/LandlordVerification';
+import { ShieldCheck, Loader2, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { StudentVerification } from '../../verification/StudentVerification';
 import { DocumentUpload } from '../../shared/DocumentUpload';
 
 export const Verification = ({ user }: { user: any }) => {
@@ -18,7 +18,7 @@ export const Verification = ({ user }: { user: any }) => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1);
-      
+
       if (error) {
         console.error('Error fetching verification:', error);
       } else {
@@ -29,9 +29,8 @@ export const Verification = ({ user }: { user: any }) => {
 
     fetchVerification();
 
-    // Set up real-time subscription
     const subscription = supabase
-      .channel(`verification_${user.id}`)
+      .channel('public_verifications')
       .on('postgres_changes', { 
         event: '*', 
         schema: 'public', 
@@ -60,8 +59,8 @@ export const Verification = ({ user }: { user: any }) => {
           <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-12 h-12 text-emerald-500" />
           </div>
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">Account Verified!</h2>
-          <p className="text-slate-500">Your landlord account has been fully verified. You can now post properties and receive bookings.</p>
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">You're Verified!</h2>
+          <p className="text-slate-500">Your account has been fully verified. You now have full access to all features.</p>
         </div>
       ) : verificationStatus?.status === 'Pending' ? (
         <div className="max-w-2xl mx-auto text-center py-20">
@@ -69,7 +68,7 @@ export const Verification = ({ user }: { user: any }) => {
             <Clock className="w-12 h-12 text-orange-500" />
           </div>
           <h2 className="text-3xl font-bold text-slate-900 mb-2">Verification Pending</h2>
-          <p className="text-slate-500 mb-8">Our team is currently reviewing your property and identity documents. This usually takes 24-72 hours.</p>
+          <p className="text-slate-500 mb-8">Our team is currently reviewing your documents. This usually takes 24-48 hours.</p>
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm inline-flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-orange-500" />
             <span className="text-sm font-medium text-slate-700">Submitted on {new Date(verificationStatus.created_at).toLocaleDateString()}</span>
@@ -84,18 +83,18 @@ export const Verification = ({ user }: { user: any }) => {
               <p className="text-sm text-rose-700">{verificationStatus.admin_notes || 'Please review your documents and try again.'}</p>
             </div>
           </div>
-          <LandlordVerification user={user} onComplete={() => {}} />
+          <StudentVerification user={user} onComplete={() => {}} />
         </div>
       ) : (
-        <LandlordVerification user={user} onComplete={() => {}} />
+        <StudentVerification user={user} onComplete={() => {}} />
       )}
 
       <div className="max-w-4xl mx-auto border-t border-slate-100 pt-12">
         <div className="text-center mb-8">
-          <h3 className="text-xl font-black text-slate-900">Verification Documents</h3>
-          <p className="text-slate-500 text-sm font-medium">Upload proof of identity and property ownership documents.</p>
+          <h3 className="text-xl font-black text-slate-900">Additional Documents</h3>
+          <p className="text-slate-500 text-sm font-medium">Upload any additional documents requested by the admin or for specific verifications.</p>
         </div>
-        <DocumentUpload user={user} role="landlord" />
+        <DocumentUpload user={user} role="student" />
       </div>
     </div>
   );
